@@ -63,7 +63,22 @@ class Engine
     public function addEntity(entity:Entity):Void
     {
         if (entityNames.exists(entity.name))
+        {            
+            #if debug
+            var extraString:String = "";
+            var extraArray:Array<Entity> = [];
+            var entityArray:Array<Entity> = Lambda.array(entityList);
+            for(entity in entityNames){
+                if(!Lambda.has(entityList, entity)){
+                    extraArray.push(entity);
+                    extraString += entity.name + ", ";
+                }
+            }
+            throw "The entity name " + entity.name + " is already in use by another entity.\nExtra: " + extraString;
+            #else
             throw "The entity name " + entity.name + " is already in use by another entity.";
+            #end
+        }
         entityList.add(entity);
         entityNames.set(entity.name, entity);
         entity.componentAdded.add(componentAdded);
@@ -267,12 +282,11 @@ class Engine
     {
         while (systemList.head != null)
         {
-          var system : System = systemList.head;
+            var system : System = systemList.head;
             systemList.head = systemList.head.next;
             system.previous = null;
             system.next = null;
             system.removeFromEngine( this );
-            removeSystem(systemList.head);
         }
         systemList.tail = null;
     }
